@@ -113,6 +113,28 @@ def publish_files_to_repo(files):
     return [f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/cards/{f.name}" for f in files]
 
 
+def fit_ratio(urls, pid):
+    """인스타 허용 비율(4:5 ~ 1.91:1)을 벗어난 이미지는 종이색 여백을 붙여 맞춘다."""
+    from io import BytesIO
+    from PIL import Image
+    out, files = [], []
+    for i, u in enumerate(urls, 1):
+        im = Image.open(BytesIO(requests.get(u, timeout=60).content)).convert("RGB")
+        w, h = im.size; r = w / h
+        if 0.8 <= r <= 1.91:
+            out.append(u); continue
+        W, H = (w, round(w / 0.8)) if r < 0.8 else (w, round(w / 1.91))
+        if r < 0.8 and H < h: W, H = round(h * 0.8), h
+        bg = Image.new("RGB", (W, H), (251, 247, 236))
+        bg.paste(im, ((W - w) // 2, (H - h) // 2))
+        f = CARDS / f"{pid}_fit{i}.jpg"; bg.save(f, quality=92)
+        files.append(f); out.append(None)
+    if files:
+        pub = iter(publish_files_to_repo(files))
+        out = [u if u else next(pub) for u in out]
+    return out
+
+
 # ---------- Instagram ----------
 def ig_post(path, **data):
     r = requests.post(f"{IG}/{path}", data={**data, "access_token": IG_TOKEN}, timeout=60)
@@ -177,9 +199,10 @@ def main():
             if mt == "TEXT_POST":
                 urls = publish_files_to_repo(render_cards(p))
             elif mt == "IMAGE":
-                urls = [p["media_url"]]
+                urls = fit_ratio([p["media_url"]], p["id"])
             elif mt == "CAROUSEL_ALBUM":
                 urls = [c["media_url"] for c in thread_children(p["id"]) if c.get("media_type") == "IMAGE"][:10]
+                urls = fit_ratio(urls, p["id"])
             else:                         # 영상 등은 현재 미지원
                 state["skipped"].append(p["id"]); print(f"건너뜀({mt}): {p.get('permalink')}"); continue
             mid = publish_ig(urls, make_caption(p.get("text")))
