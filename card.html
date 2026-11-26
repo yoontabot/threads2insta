@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:1080px; height:1350px; background:#FBF7EC;
+         font-family:"Noto Sans CJK KR","Noto Sans KR",sans-serif; color:#1a1a1a; }
+  .page { position:relative; width:1080px; height:1350px; padding:90px 96px 80px;
+          background:
+            repeating-linear-gradient(#FBF7EC 0 63px, #E9E2D0 63px 64px); }
+  .top { display:flex; justify-content:space-between; align-items:flex-end;
+         border-bottom:3px solid #111; padding-bottom:18px; margin-bottom:46px; }
+  .brand { font-family:"Noto Serif CJK KR","Noto Serif KR",serif; font-weight:900; font-size:40px; }
+  .meta { font-size:26px; color:#555; }
+  .lead { font-family:"Noto Serif CJK KR","Noto Serif KR",serif; font-weight:900;
+          font-size:54px; line-height:1.45; margin-bottom:40px; }
+  .lead mark { background:linear-gradient(transparent 52%, #FFE24A 52% 92%, transparent 92%);
+               color:inherit; padding:0 4px; }
+  .body { font-size:38px; line-height:1.68; white-space:pre-wrap; word-break:keep-all; }
+  .pen { position:absolute; left:96px; bottom:150px; width:120px; height:8px;
+         background:#D7261E; border-radius:4px; transform:rotate(-2deg); opacity:.85; }
+  .foot { position:absolute; left:96px; right:96px; bottom:70px; border-top:1px solid #111;
+          padding-top:16px; display:flex; justify-content:space-between; font-size:26px; color:#444; }
+  .foot .blue { color:#1D4FD8; font-weight:700; }
+</style></head>
+<body><div class="page">
+  <div class="top"><div class="brand">{{BRAND}}</div><div class="meta">{{DATE}}</div></div>
+  {{LEAD}}
+  <div class="body">{{BODY}}</div>
+  {{PEN}}
+  <div class="foot"><span>{{HANDLE}}</span><span class="blue">{{PAGENO}}</span></div>
+</div></body></html>

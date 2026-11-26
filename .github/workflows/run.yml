@@ -1,0 +1,32 @@
+name: threads-to-instagram
+on:
+  schedule:
+    - cron: "17 * * * *"      # 매시 17분 (UTC 기준, 1시간마다)
+  workflow_dispatch: {}        # 수동 실행 버튼
+permissions:
+  contents: write
+concurrency: t2i
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: |
+          sudo apt-get update && sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
+          pip install requests playwright && python -m playwright install chromium
+      - name: run
+        env:
+          THREADS_TOKEN: ${{ secrets.THREADS_TOKEN }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          HASHTAGS: "#주식공부 #투자공부 #윤타"
+        run: |
+          git config user.name "t2i-bot" && git config user.email "bot@users.noreply.github.com"
+          python main.py
+      - name: save state
+        run: |
+          git add state/ && git commit -m "state" || true
+          git push || true
