@@ -8,6 +8,14 @@ on:
         description: "최신 Threads 글 1개를 바로 인스타에 게시 (테스트용)"
         type: boolean
         default: false
+      post_today:
+        description: "오늘(한국시간) 올린 Threads 글을 전부 게시"
+        type: boolean
+        default: false
+      max_per_run:
+        description: "이번 실행에서 최대 게시 개수"
+        type: string
+        default: "3"
 permissions:
   contents: write
 concurrency: t2i
@@ -29,6 +37,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT }}
           HASHTAGS: "#주식공부 #투자공부 #윤타"
           FORCE_LATEST: ${{ inputs.force_latest && '1' || '0' }}
+          POST_TODAY: ${{ inputs.post_today && '1' || '0' }}
+          MAX_PER_RUN: ${{ inputs.max_per_run }}
         run: |
           git config user.name "t2i-bot" && git config user.email "bot@users.noreply.github.com"
           python main.py

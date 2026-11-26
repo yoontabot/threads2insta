@@ -17,7 +17,7 @@ BRANCH = os.environ.get("BRANCH", "main")
 BRAND = os.environ.get("CARD_BRAND", "윤타의 투자노트")
 HANDLE = os.environ.get("CARD_HANDLE", "@yoonta")
 HASHTAGS = os.environ.get("HASHTAGS", "")
-MAX_PER_RUN = int(os.environ.get("MAX_PER_RUN", "3"))
+MAX_PER_RUN = int(os.environ.get("MAX_PER_RUN") or "3")
 CHARS_PER_PAGE = 230
 TH = "https://graph.threads.com/v1.0"
 IG = "https://graph.facebook.com/v21.0"   # 통합 로그인(EAA 시스템 사용자 토큰, 만료 없음)
@@ -157,6 +157,14 @@ def main():
         others = {p["id"] for p in posts} | set(prev["posted"]) | set(prev["skipped"])
         state = {"posted": sorted(others - {latest}), "skipped": []}
         save_state(state)
+    if os.environ.get("POST_TODAY") == "1" and state is not None:   # 오늘(KST) 올린 글 전부 다시 대상으로
+        today = datetime.now(KST).date()
+        def kst_date(p): return datetime.strptime(p["timestamp"], "%Y-%m-%dT%H:%M:%S%z").astimezone(KST).date()
+        pub = set(state.get("published", []))
+        todays = {p["id"] for p in posts if kst_date(p) == today and p["timestamp"] not in pub}
+        state["posted"] = [i for i in state["posted"] if i not in todays]
+        state["skipped"] = [i for i in state["skipped"] if i not in todays]
+        print(f"오늘 글 {len(todays)}개를 게시 대상으로 설정")
     if state is None:                     # 첫 실행: 기존 글은 건너뛰고 지금부터 올라오는 글만
         save_state({"posted": [p["id"] for p in posts], "skipped": []})
         print(f"초기화 완료: 기존 글 {len(posts)}개는 건너뜀")
@@ -176,6 +184,7 @@ def main():
                 state["skipped"].append(p["id"]); print(f"건너뜀({mt}): {p.get('permalink')}"); continue
             mid = publish_ig(urls, make_caption(p.get("text")))
             state["posted"].append(p["id"])
+            state.setdefault("published", []).append(p["timestamp"])
             print(f"게시 완료: {p.get('permalink')} -> IG {mid}")
         except Exception as e:
             print(f"실패: {p.get('permalink')} :: {e}", file=sys.stderr)
