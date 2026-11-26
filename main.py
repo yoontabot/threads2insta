@@ -20,7 +20,7 @@ HASHTAGS = os.environ.get("HASHTAGS", "")
 MAX_PER_RUN = int(os.environ.get("MAX_PER_RUN", "3"))
 CHARS_PER_PAGE = 230
 TH = "https://graph.threads.com/v1.0"
-IG = "https://graph.instagram.com/v21.0"
+IG = "https://graph.facebook.com/v21.0"   # 통합 로그인(EAA 시스템 사용자 토큰, 만료 없음)
 
 
 def load_state():
@@ -37,9 +37,6 @@ def refresh_tokens():
     r = requests.get("https://graph.threads.com/refresh_access_token",
                      params={"grant_type": "th_refresh_token", "access_token": TH_TOKEN}, timeout=30)
     if r.ok: out["THREADS_TOKEN"] = r.json()["access_token"]
-    r = requests.get("https://graph.instagram.com/refresh_access_token",
-                     params={"grant_type": "ig_refresh_token", "access_token": IG_TOKEN}, timeout=30)
-    if r.ok: out["IG_TOKEN"] = r.json()["access_token"]
     for name, val in out.items():
         if val != os.environ[name] and os.environ.get("GH_TOKEN"):
             subprocess.run(["gh", "secret", "set", name, "--body", val, "-R", REPO], check=False)
@@ -154,6 +151,12 @@ def main():
     refresh_tokens()
     posts = [p for p in fetch_threads() if p.get("media_type") != "REPOST_FACADE"]
     state = load_state()
+    if os.environ.get("FORCE_LATEST") == "1" and posts:   # 베타테스트: 최신 글 1개 즉시 게시
+        latest = max(posts, key=lambda p: p["timestamp"])["id"]
+        prev = state or {"posted": [], "skipped": []}
+        others = {p["id"] for p in posts} | set(prev["posted"]) | set(prev["skipped"])
+        state = {"posted": sorted(others - {latest}), "skipped": []}
+        save_state(state)
     if state is None:                     # 첫 실행: 기존 글은 건너뛰고 지금부터 올라오는 글만
         save_state({"posted": [p["id"] for p in posts], "skipped": []})
         print(f"초기화 완료: 기존 글 {len(posts)}개는 건너뜀")
