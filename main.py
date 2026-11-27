@@ -15,7 +15,7 @@ IG_USER_ID = os.environ["IG_USER_ID"]
 REPO = os.environ.get("GITHUB_REPOSITORY", "")      # owner/repo (공개 저장소)
 BRANCH = os.environ.get("BRANCH", "main")
 BRAND = os.environ.get("CARD_BRAND", "윤타의 투자노트")
-HANDLE = os.environ.get("CARD_HANDLE", "@yoonta")
+HANDLE = os.environ.get("CARD_HANDLE", "@yoonta.official")
 HASHTAGS = os.environ.get("HASHTAGS", "")
 MAX_PER_RUN = int(os.environ.get("MAX_PER_RUN") or "3")
 CHARS_PER_PAGE = 230
@@ -247,14 +247,20 @@ def main():
         mt = p.get("media_type")
         try:
             if mt == "TEXT_POST":
-                urls = publish_files_to_repo(render_cards(p))
+                img_urls = []
             elif mt == "IMAGE":
-                urls = fit_ratio([p["media_url"]], p["id"])
+                img_urls = [p["media_url"]]
             elif mt == "CAROUSEL_ALBUM":
-                urls = [c["media_url"] for c in thread_children(p["id"]) if c.get("media_type") == "IMAGE"][:10]
-                urls = fit_ratio(urls, p["id"])
-            else:                         # 영상 등은 현재 미지원
+                img_urls = [c["media_url"] for c in thread_children(p["id"]) if c.get("media_type") == "IMAGE"]
+            else:
+                img_urls = None
+            if img_urls is None or (not img_urls and not (p.get("text") or "").strip()):   # 영상 등은 미지원
                 state["skipped"].append(p["id"]); RESULT["skipped"].append(p.get("permalink")); print(f"건너뜀({mt}): {p.get('permalink')}"); continue
+            imgs = [requests.get(u, timeout=60).content for u in img_urls[:9]]
+            when = datetime.strptime(p["timestamp"], "%Y-%m-%dT%H:%M:%S%z").astimezone(KST)
+            from render import render_post
+            files = [Path(f) for f in render_post(p.get("text") or "", imgs, str(CARDS / p["id"]), when, BRAND, HANDLE)]
+            urls = publish_files_to_repo(files)
             mid = publish_ig(urls, make_caption(p.get("text")))
             state["posted"].append(p["id"])
             state.setdefault("published", []).append(p["timestamp"])
