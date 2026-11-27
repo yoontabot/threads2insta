@@ -5,5 +5,25 @@
   "failed": [],
   "skipped": [],
   "error": null
+ },
+ {
+  "time": "2026-11-27 13:32",
+  "posted": [],
+  "failed": [
+   "삭제 실패: https://www.instagram.com/p/DgOs4JsGx-e/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"AjpR9fHhqY-8Ufo3sPm2Mvu\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgOh5BdjpOk/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"AxAQGZ2ERnMZqjekDSwhAms\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgOh25jjnwS/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"A0szVVleWUDE9SuZ1JU436z\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNEESyDa5r/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"AZZaj3Z2BD8bKZgQU2mdKg2\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNDx66kcVM/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"AU8uwpQ5CnTqj_UJhRAX4rZ\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNDwRWjU4r/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"Az_8iLdmpdDyYVcqg-eElHC\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNDuwqDcuv/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"AzNJnHI3TgNWzfYvi-TP8CW\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNDtOrDcfO/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"A1bQudsfNX-4WsODB-sLceh\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNDqJcDQqe/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"A3X84GWMhkULOdBo8cAOT9A\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNDoxWjVrW/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"AUxgyTNKvLWyLK63s2V5SH4\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNDnN1jXRB/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"A_p6q4ngBXqh3VOqNoUDvMv\"}}",
+   "삭제 실패: https://www.instagram.com/p/DgNC4tPINjs/ :: {\"error\":{\"message\":\"(#10) Insufficient permissions to access this data\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"AfToDa8lN9Xj1nHUBfgX3me\"}}"
+  ],
+  "skipped": [],
+  "error": null
  }
 ]
