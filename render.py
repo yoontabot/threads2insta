@@ -104,7 +104,10 @@ def render_post(text, images, out_prefix, when, brand="윤타의 투자노트", 
             # 사진 액자: 남은 높이에 맞춤
             pg.evaluate("""()=>{const m=document.querySelector('.main'),im=document.querySelector('.frame img');
                 if(im){const lab=document.querySelector('.label');
-                  im.style.maxHeight=(m.clientHeight-(lab?lab.offsetHeight+28:0)-24)+'px';}}""")
+                  const H=m.clientHeight-(lab?lab.offsetHeight+28:0)-24, W=892;
+                  const k=Math.min(W/im.naturalWidth, H/im.naturalHeight);
+                  im.style.maxHeight='none'; im.style.maxWidth='none';
+                  im.style.width=Math.round(im.naturalWidth*k)+'px'; im.style.height=Math.round(im.naturalHeight*k)+'px';}}""")
             # 글이 넘치면 글자 크기를 줄임
             pg.evaluate("""()=>{const m=document.querySelector('.main');
                 for(let k=0;k<12&&m.scrollHeight>m.clientHeight;k++){
