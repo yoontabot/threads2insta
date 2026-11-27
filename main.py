@@ -187,8 +187,40 @@ def write_runlog():
     RUNLOG.write_text(json.dumps(log[-72:], ensure_ascii=False, indent=1))
 
 
+# ---------- 자동 게시물 삭제 ----------
+AUTO_START = "2026-11-26T11:50:00+0000"   # 자동 게시 시작 시각(UTC)
+
+
+def delete_auto(mode):
+    """자동 게시 시작 이후 올라간 인스타 게시물 중, 캡션이 Threads 원문과 일치하는 것만 삭제."""
+    th = fetch_threads()
+    starts = {re.sub(r"\s+", " ", (p.get("text") or "")).strip()[:30] for p in th}
+    r = requests.get(f"{IG}/{IG_USER_ID}/media", params={"fields": "id,timestamp,caption,permalink",
+                     "limit": 50, "access_token": IG_TOKEN}, timeout=30)
+    r.raise_for_status()
+    targets = []
+    for m in r.json().get("data", []):
+        if m["timestamp"] < AUTO_START:
+            continue
+        cap = re.sub(r"\s+", " ", (m.get("caption") or "")).strip()[:30]
+        if cap in starts:
+            targets.append(m)
+    print(f"삭제 대상 {len(targets)}개 (자동 게시 시작 이후 + Threads 원문과 캡션 일치)")
+    for m in targets:
+        print(f"  {m['timestamp']} {m['permalink']} :: {(m.get('caption') or '')[:30]!r}")
+    if mode != "yes":
+        return
+    for m in targets:
+        d = requests.delete(f"{IG}/{m['id']}", params={"access_token": IG_TOKEN}, timeout=30)
+        ok = d.ok and d.json().get("success", True)
+        (RESULT["posted"] if ok else RESULT["failed"]).append(f"삭제 {'완료' if ok else '실패'}: {m['permalink']}" + ("" if ok else f" :: {safe(d.text)}"))
+        print(RESULT["posted"][-1] if ok else RESULT["failed"][-1])
+
+
 # ---------- 메인 ----------
 def main():
+    if os.environ.get("DELETE_AUTO") in ("dry", "yes"):
+        return delete_auto(os.environ["DELETE_AUTO"])
     refresh_tokens()
     posts = [p for p in fetch_threads() if p.get("media_type") != "REPOST_FACADE"]
     state = load_state()
