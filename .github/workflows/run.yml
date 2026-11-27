@@ -1,7 +1,7 @@
 name: threads-to-instagram
 on:
-  # schedule:                 # 판형 교체 전까지 일시정지 (2026-11-27)
-  #   - cron: "17 * * * *"
+  schedule:
+    - cron: "17 * * * *"      # 매시 17분 (1시간마다)
   workflow_dispatch:           # 수동 실행 버튼
     inputs:
       force_latest:
@@ -14,6 +14,10 @@ on:
         default: false
       delete_auto_posts:
         description: "자동 게시물 삭제: dry(목록만) / yes(삭제)"
+        type: string
+        default: ""
+      repost_since:
+        description: "이 시각(UTC, 예 2026-11-25T15:00:00+0000) 이후 글 재게시"
         type: string
         default: ""
       max_per_run:
@@ -44,6 +48,7 @@ jobs:
           POST_TODAY: ${{ inputs.post_today && '1' || '0' }}
           MAX_PER_RUN: ${{ inputs.max_per_run }}
           DELETE_AUTO: ${{ inputs.delete_auto_posts }}
+          REPOST_SINCE: ${{ inputs.repost_since }}
         run: |
           git config user.name "t2i-bot" && git config user.email "bot@users.noreply.github.com"
           python main.py

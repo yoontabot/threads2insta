@@ -237,6 +237,13 @@ def main():
         state["posted"] = [i for i in state["posted"] if i not in todays]
         state["skipped"] = [i for i in state["skipped"] if i not in todays]
         print(f"오늘 글 {len(todays)}개를 게시 대상으로 설정")
+    since = os.environ.get("REPOST_SINCE", "").strip()
+    if since and state is not None:       # 지정 시각 이후 Threads 글을 다시 게시 대상으로
+        pub = set(state.get("published", []))
+        again = {p["id"] for p in posts if p["timestamp"] >= since and p["timestamp"] not in pub}
+        state["posted"] = [i for i in state["posted"] if i not in again]
+        state["skipped"] = [i for i in state["skipped"] if i not in again]
+        print(f"재게시 대상 {len(again)}개 ({since} 이후)")
     if state is None:                     # 첫 실행: 기존 글은 건너뛰고 지금부터 올라오는 글만
         save_state({"posted": [p["id"] for p in posts], "skipped": []})
         print(f"초기화 완료: 기존 글 {len(posts)}개는 건너뜀")
