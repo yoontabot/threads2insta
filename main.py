@@ -168,6 +168,25 @@ def make_caption(text):
     return cap[:2200]
 
 
+# ---------- 실행 기록 (점검용, 공개 저장소이므로 토큰은 반드시 가림) ----------
+RUNLOG = ROOT / "state" / "run_log.json"
+RESULT = {"posted": [], "failed": [], "skipped": [], "error": None}
+
+
+def safe(msg):
+    msg = re.sub(r"access_token=[^&\s\"']+", "access_token=***", str(msg))
+    msg = re.sub(r"\b(EAA|TH|IG|github_pat_)[A-Za-z0-9_\-]{20,}", "***", msg)
+    for v in (TH_TOKEN, IG_TOKEN):
+        if v: msg = msg.replace(v, "***")
+    return msg[:300]
+
+
+def write_runlog():
+    log = json.loads(RUNLOG.read_text()) if RUNLOG.exists() else []
+    log.append({"time": datetime.now(KST).strftime("%Y-%m-%d %H:%M"), **RESULT})
+    RUNLOG.write_text(json.dumps(log[-72:], ensure_ascii=False, indent=1))
+
+
 # ---------- 메인 ----------
 def main():
     refresh_tokens()
@@ -204,15 +223,23 @@ def main():
                 urls = [c["media_url"] for c in thread_children(p["id"]) if c.get("media_type") == "IMAGE"][:10]
                 urls = fit_ratio(urls, p["id"])
             else:                         # 영상 등은 현재 미지원
-                state["skipped"].append(p["id"]); print(f"건너뜀({mt}): {p.get('permalink')}"); continue
+                state["skipped"].append(p["id"]); RESULT["skipped"].append(p.get("permalink")); print(f"건너뜀({mt}): {p.get('permalink')}"); continue
             mid = publish_ig(urls, make_caption(p.get("text")))
             state["posted"].append(p["id"])
             state.setdefault("published", []).append(p["timestamp"])
+            RESULT["posted"].append(p.get("permalink"))
             print(f"게시 완료: {p.get('permalink')} -> IG {mid}")
         except Exception as e:
-            print(f"실패: {p.get('permalink')} :: {e}", file=sys.stderr)
+            RESULT["failed"].append(f"{p.get('permalink')} :: {safe(e)}")
+            print(f"실패: {p.get('permalink')} :: {safe(e)}", file=sys.stderr)
         save_state(state)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        RESULT["error"] = safe(e)
+        raise
+    finally:
+        write_runlog()
